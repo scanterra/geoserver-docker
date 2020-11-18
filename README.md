@@ -1,126 +1,50 @@
-# geoserver-docker
+# Geoserver Docker
 
-[GeoServer](http://geoserver.org) is an open source server for sharing geospatial data.
-This is a docker image that eases setting up a GeoServer running specifically for [GeoNode](https://github.com/GeoNode/geoserver-geonode-ext) with an additional separated data directory.
+[![Actions Status](https://github.com/scanterra/geoserver-docker/workflows/build/badge.svg)](https://github.com/scanterra/geoserver-docker/actions)
 
-The image is based on the official Tomcat 9 image
+## Contenido
 
-## Installation
+* [Informacion general](#informacion-general)
+* [Tecnologias](#tecnologias)
+* [Setup](#setup)
+* [CI/CD](#ci/cd)
+* [Referencias](#referencias)
 
-This image is available as a [trusted build on the docker hub](https://registry.hub.docker.com/r/geonode/geoserver/), and is the recommended method of installation.
-Simple pull the image from the docker hub.
+## Informacion General
 
-```bash
-$ docker pull geonode/geoserver
-```
+Este repositorio es un fork del repositorio [geoserver-docker](https://github.com/GeoNode/geoserver-docker).  
+Actualmente estamos usando la versión desde el commit: `8e86c22a4e1de421160485ef2129b5cc93917050`.
 
-Alternatively you can build the image locally
+Scanterra no realizó cambios en este repositorio.
 
-```bash
-$ git clone https://github.com/geonode/geoserver-docker.git
-$ cd geoserver-docker
-$ docker build -t "geonode/geoserver" .
-```
+## Tecnologias
 
-## Quick start
+Las mismas utilizadas en [geoserver-docker](https://github.com/GeoNode/geoserver-docker).
 
-You can quick start the image using the command line
+* Utiliza:
+* Imagenes:
+    - [tomcat:9-jre8](https://hub.docker.com/_/tomcat)
 
-```bash
-$ docker run --name "geoserver" -v /var/run/docker.sock:/var/run/docker.sock -d -p 8080:8080 geonode/geoserver
-```
+## Setup
 
-Point your browser to `http://localhost:8080/geoserver` and login using GeoServer's default username and password:
+La generación de imágenes solo utiliza el Dockerfile local del repositorio.
 
-* Username: admin
-* Password: geoserver
+- Requerimientos:
+    - [`Docker`](https://docs.docker.com/)
+- Generar imágen `scanterra/geoserver-docker:latest`
+    - `docker build -t scanterra/data-docker:latest .`
 
-## How to use different versions
+Recordar que al momento de instanciar esta imágen debe estar generada la carpeta `/geoserver_data/data` con la información del repositorio [data-docker](https://github.com/scanterra/data-docker).
 
-There are mainly two different versions of this image which are useful for running **GeoNode** with different authentication system types. These versions are released as specific tags for two authentication mechanisms:
+### CI/CD
 
-**Cookie based authn**:
-- [geonode/geoserver:2.9.x](https://hub.docker.com/r/geonode/geoserver/builds/bx7ydhghnlrfnsppduyva73/)
+Se deben configurar los siguientes secrets en este repositorio:
+- **Docker Hub**, credenciales con los permisos necesarios para acceder, pullear y pushear a la organización [**Scanterra**](https://hub.docker.com/orgs/scanterra).
+  - **DOCKERHUB_USERNAME:** nombre del usuario
+  - **DOCKERHUB_PASSWORD:** contraseña del usuario
 
-**Oauth2 based authn**:
-- [geonode/geoserver:2.9.x-oauth2](https://hub.docker.com/r/geonode/geoserver/builds/bwca5rtexeoegzgroavftdr/)
-- [geonode/geoserver:2.10.x](https://hub.docker.com/r/geonode/geoserver/builds/bjohcnc29vm69acqjrvndxf/)
-- [geonode/geoserver:2.12.x](https://hub.docker.com/r/geonode/geoserver/builds/bh7pyw5atmkcljurwsnzbs7/)
-- [geonode/geoserver:2.13.x](https://hub.docker.com/r/geonode/geoserver/builds/btmjctbuvrjfnnrxrs4wyrs/)
+Ver este [documento](https://github.com/scanterra/scanterra_quickstart) con la información del flujo de CI/CD.
 
-You can declare what version to use along with the data directory tag which corresponds to the same version.  
+## Referencias
 
-## Configuration
-
-### Data volume
-
-This GeoServer container keeps its configuration data at `/geoserver_data/data` which is exposed as volume in the dockerfile.
-The volume allows for stopping and starting new containers from the same image without losing all the data and custom configuration.
-
-You may want to map this volume to a directory on the host. It will also ease the upgrade process in the future. Volumes can be mounted by passing the `-v` flag to the docker run command:
-
-```bash
--v /your/host/data/path:/geoserver_data/data
-```
-
-### Data volume container
-
-In case you are running Compose for automatically having GeoServer up and running then a data volume container will be mounted with a default preloaded *GEOSERVER_DATA_DIR* at the configuration data directory of the container.
-Make sure that the image from the repository [data-docker](https://github.com/GeoNode/data-docker) is available from the [GeoNode Docker Hub](https://hub.docker.com/u/geonode/) or has been built locally:
-
-```bash
-docker build -t geonode/geoserver_data .
-```
-
-#### Persistance behavior
-
-If you run:
-
-```bash
-docker-compose stop
-```
-
-Data are retained in the *GEOSERVER_DATA_DIR* and can then be mounted in a new GeoServer instance by running again:
-
-```bash
-docker-compose up
-```
-
-If you run:
-
-```bash
-docker-compose down
-```
-
-Data are completely gone but you can ever start from the base GeoServer Data Directory built for Geonode.
-
-#### Data directory versions
-
-There has to be a correspondence one-to-one between the data directory version and the tag of the GeoServer image used in the Docker compose file. So at the end you can consume these images below:
-
-* **2.9.x**: [geonode/geoserver_data:2.9.x](https://hub.docker.com/r/geonode/geoserver_data/builds/bsus6alnddg4bc7icwymevp/)
-* **2.9.x-oauth2**: [geonode/geoserver_data:2.9.x-oauth2](https://hub.docker.com/r/geonode/geoserver_data/builds/bwkxcupsunvuitzusi9gsnt/)
-* **2.10.x**: [geonode/geoserver_data:2.10.x](https://hub.docker.com/r/geonode/geoserver_data/builds/b5jqhpzapkqxzyevjizccug/)
-* **2.12.x**: [geonode/geoserver_data:2.12.x](https://hub.docker.com/r/geonode/geoserver_data/builds/byaaalw3lnasunpveyg3x4i/)
-* **2.13.x**: [geonode/geoserver_data:2.13.x](https://hub.docker.com/r/geonode/geoserver_data/builds/bunuqzq7a7dk65iumjhkbtc/)
-
-### Database
-
-GeoServer recommends the usage of a spatial database
-
-#### PostGIS container (PostgreSQL + GIS Extension)
-
-If you want to use a [PostGIS](http://postgis.org/) container, you can link it to this image. You're free to use any PostGIS container.
-An example with [kartooza/postgis](https://registry.hub.docker.com/u/kartoza/postgis/) image:
-
-```bash
-$ docker run -d --name="postgis" kartoza/postgis
-```
-
-For further information see [kartooza/postgis](https://registry.hub.docker.com/u/kartoza/postgis/).
-
-Now start the GeoServer instance by adding the `--link` option to the docker run command:
-
-```bash
---link postgis:postgis
-```
+- [Readme Anterior](/README_OLD.md)
